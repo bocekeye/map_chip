@@ -18,6 +18,7 @@ namespace
 
 	//入出力ファイル名
 	const char* const kFileName = "map.bin";
+//	const char* const kFileName = "bin/map.bin"; フォルダに保存する場合
 
 	//マップデータ
 	constexpr int kMapData[kBgNumY][kBgNumX] =
@@ -90,8 +91,9 @@ void Map::update()
 	}
 	if (Pad::isTrigger(PAD_INPUT_3))
 	{
-		//ファイルの出力
-		outputData();
+	  //ファイルの出力
+	//	outputData();
+		readData();
 	}
 
 	if (Pad::isTrigger(PAD_INPUT_UP))
@@ -173,7 +175,13 @@ int Map::chipNum()
 void Map::outputData()
 {
 	std::ofstream ofs(kFileName, std::ios::binary);
-	
+
+	//ファイルの読み込みに失敗
+	if (!ofs)
+	{
+		return;
+	}
+	// バイナリとして書き込む
 	ofs.write(reinterpret_cast<char*>(m_mapData.data()), sizeof(int) * kBgNumX * kBgNumY);
 
 	//ファイルのクローズ
@@ -184,6 +192,12 @@ void Map::readData()
 {
 	std::ifstream ifs(kFileName, std::ios::binary);
 
+	//ファイルの読み込みに失敗
+	if (!ifs)
+	{
+		return;
+	}
+	// バイナリとして読み込む
 	ifs.read(reinterpret_cast<char*>(m_mapData.data()), sizeof(int) * kBgNumX * kBgNumY);
 
 	//ファイルのクローズ
