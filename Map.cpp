@@ -47,7 +47,9 @@ Map::Map() :
 	m_graphWidth(0),
 	m_graphHeight(0),
 	m_cursorNo(0),
-	m_mapData(kBgNumX * kBgNumY, 0)
+	m_mapData(kBgNumX * kBgNumY, 0),
+	m_scrollX(0),
+	m_scrollY(0)
 {
 
 }
@@ -73,6 +75,7 @@ void Map::update()
 	int indexX = m_cursorNo % kBgNumX; //余り
 	int indexY = m_cursorNo / kBgNumX; //割り算
 
+#if false
 	if (Pad::isTrigger(PAD_INPUT_1))
 	{
 		//指定したマップチップの変更
@@ -125,10 +128,43 @@ void Map::update()
 			m_cursorNo++;
 		}
 	}
+#else
+	if (Pad::isPress(PAD_INPUT_UP))
+	{
+		m_scrollY++;
+	}
+
+	if (Pad::isPress(PAD_INPUT_DOWN))
+	{
+		m_scrollY--;
+	}
+	if (Pad::isPress(PAD_INPUT_LEFT))
+	{
+		m_scrollX++;
+	}
+	if (Pad::isPress(PAD_INPUT_RIGHT))
+	{
+		m_scrollX--;
+	}
+#endif
 }
 
 void Map::draw()
 {
+	//m_scrollX > 0 右にずれている
+	//m_scrollX < 0 左にずれている
+	//m_scrollY > 0 上にずれている
+	//m_scrollY < 0 下にずれている
+
+	int indexX = 0;
+	int indexY = 0;
+
+	indexX = -(m_scrollX / kChipSize);
+	while (indexX < 0) indexX += kBgNumX;
+
+	indexY = -(m_scrollY / kChipSize);
+	while (indexY < 0) indexY += kBgNumX;
+
 	for (int x = 0; x < kBgNumX; x++)
 	{
 		for (int y = 0; y < kBgNumY; y++)
@@ -139,7 +175,7 @@ void Map::draw()
 			int graphX = (chipNo % chipNumX()) * kChipSize;
 			int graphY = (chipNo / chipNumX()) * kChipSize;
 
-			DrawRectGraph(x * kChipSize, y * kChipSize,
+			DrawRectGraph(x * kChipSize + m_scrollX, y * kChipSize + m_scrollY,
 				graphX, graphY, kChipSize, kChipSize,
 				m_handle, true, false);
 		}

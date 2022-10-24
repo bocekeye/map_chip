@@ -43,4 +43,8 @@ private:
 	int m_cursorNo;
 
 	std::vector <int> m_mapData;
+
+	//ƒXƒNƒ[ƒ‹‚·‚é
+	int m_scrollX;
+	int m_scrollY;
 };
