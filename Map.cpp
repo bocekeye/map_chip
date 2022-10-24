@@ -4,6 +4,9 @@
 #include "Pad.h"
 #include <cassert>
 
+#include <iostream>
+#include <fstream>
+
 namespace
 {
 	//マップチップサイズ1つのサイズ
@@ -12,6 +15,9 @@ namespace
 	//チップの数
 	constexpr int kBgNumX = Game::kScreenWidth / kChipSize;
 	constexpr int kBgNumY = Game::kScreenHeight / kChipSize;
+
+	//入出力ファイル名
+	const char* const kFileName = "map.bin";
 
 	//マップデータ
 	constexpr int kMapData[kBgNumY][kBgNumX] =
@@ -66,28 +72,51 @@ void Map::update()
 	int indexX = m_cursorNo % kBgNumX; //余り
 	int indexY = m_cursorNo / kBgNumX; //割り算
 
-	if (Pad::isPress(PAD_INPUT_UP))
+	if (Pad::isTrigger(PAD_INPUT_1))
+	{
+		//指定したマップチップの変更
+		if (m_mapData[m_cursorNo] < chipNum() - 1)
+		{
+			m_mapData[m_cursorNo]++;
+		}
+	}
+	if (Pad::isTrigger(PAD_INPUT_2))
+	{
+		//指定したマップチップの変更
+		if (m_mapData[m_cursorNo] > 0)
+		{
+			m_mapData[m_cursorNo]--;
+		}
+	}
+	if (Pad::isTrigger(PAD_INPUT_3))
+	{
+		//ファイルの出力
+		outputData();
+	}
+
+	if (Pad::isTrigger(PAD_INPUT_UP))
 	{
 		if (indexY > 0)
 		{
 			m_cursorNo -= kBgNumX;
 		}
 	}
-	if (Pad::isPress(PAD_INPUT_DOWN))
+
+	if (Pad::isTrigger(PAD_INPUT_DOWN))
 	{
 		if (indexY < (kBgNumY - 1))
 		{
 			m_cursorNo += kBgNumX;
 		}
 	}
-	if (Pad::isPress(PAD_INPUT_LEFT))
+	if (Pad::isTrigger(PAD_INPUT_LEFT))
 	{
 		if (indexX > 0)
 		{
 			m_cursorNo--;
 		}	
 	}
-	if (Pad::isPress(PAD_INPUT_RIGHT))
+	if (Pad::isTrigger(PAD_INPUT_RIGHT))
 	{
 		if (indexX < (kBgNumX - 1))
 		{
@@ -139,5 +168,20 @@ int Map::chipNumY()
 int Map::chipNum()
 {
 	return (chipNumX() * chipNumY());
+}
+
+void Map::outputData()
+{
+	std::ofstream ofs(kFileName, std::ios::binary);
+	
+	ofs.write(reinterpret_cast<char*>(m_mapData.data()), sizeof(int) * kBgNumX * kBgNumY);
+
+	//ファイルのクローズ
+	ofs.close();
+}
+
+void Map::readData()
+{
+	
 }
 
