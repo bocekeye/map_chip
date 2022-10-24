@@ -182,6 +182,11 @@ void Map::outputData()
 
 void Map::readData()
 {
-	
+	std::ifstream ifs(kFileName, std::ios::binary);
+
+	ifs.read(reinterpret_cast<char*>(m_mapData.data()), sizeof(int) * kBgNumX * kBgNumY);
+
+	//ファイルのクローズ
+	ifs.close();
 }
 
