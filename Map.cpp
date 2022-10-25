@@ -75,7 +75,7 @@ void Map::update()
 	int indexX = m_cursorNo % kBgNumX; //余り
 	int indexY = m_cursorNo / kBgNumX; //割り算
 
-#if false
+
 	if (Pad::isTrigger(PAD_INPUT_1))
 	{
 		//指定したマップチップの変更
@@ -94,11 +94,12 @@ void Map::update()
 	}
 	if (Pad::isTrigger(PAD_INPUT_3))
 	{
-	  //ファイルの出力
-	//	outputData();
+		//ファイルの出力
+	  //outputData();
 		readData();
 	}
-
+	
+#if false
 	if (Pad::isTrigger(PAD_INPUT_UP))
 	{
 		if (indexY > 0)
@@ -129,22 +130,38 @@ void Map::update()
 		}
 	}
 #else
+	
 	if (Pad::isPress(PAD_INPUT_UP))
 	{
-		m_scrollY++;
+		m_scrollY+= 8;
+		if (m_scrollY > Game::kScreenHeight)
+		{
+			m_scrollY -= Game::kScreenHeight;
+		}
 	}
-
 	if (Pad::isPress(PAD_INPUT_DOWN))
 	{
-		m_scrollY--;
+		m_scrollY-= 8;
+		if (m_scrollY < -Game::kScreenHeight)
+		{
+			m_scrollY += Game::kScreenHeight;
+		}
 	}
 	if (Pad::isPress(PAD_INPUT_LEFT))
 	{
-		m_scrollX++;
+		m_scrollX+= 8;
+		if (m_scrollX > Game::kScreenWidth)
+		{
+			m_scrollX -= Game::kScreenWidth;
+		}
 	}
 	if (Pad::isPress(PAD_INPUT_RIGHT))
 	{
-		m_scrollX--;
+		m_scrollX-=8;
+		if (m_scrollX < -Game::kScreenWidth)
+		{
+			m_scrollX += Game::kScreenWidth;
+		}
 	}
 #endif
 }
@@ -156,15 +173,45 @@ void Map::draw()
 	//m_scrollY > 0 上にずれている
 	//m_scrollY < 0 下にずれている
 
-	int indexX = 0;
-	int indexY = 0;
+	//int indexX = 0;
+	//int indexY = 0;
 
-	indexX = -(m_scrollX / kChipSize);
-	while (indexX < 0) indexX += kBgNumX;
+	//indexX = -(m_scrollX / kChipSize);
+	//while (indexX < 0) indexX += kBgNumX;
 
-	indexY = -(m_scrollY / kChipSize);
-	while (indexY < 0) indexY += kBgNumX;
+	//indexY = -(m_scrollY / kChipSize);
+	//while (indexY < 0) indexY += kBgNuX;
 
+#if false
+	for (int x = -1; x <= 1; x++)
+	{
+		for (int y = -1; y <= 1; y++)
+		{
+			int offsetX = x * Game::kScreenWidth + m_scrollX;
+			int offsetY = y * Game::kScreenHeight + m_scrollY;
+			drawMap(offsetX, offsetY);
+		}
+	}
+#else
+	int offsetX = m_scrollX;
+	if (offsetX > 0) offsetX -= Game::kScreenWidth;
+
+	int offsetY = m_scrollY;
+	if (offsetY > 0) offsetY -= Game::kScreenHeight;
+
+	for (int x = 0; x < 2; x++)
+	{
+		for (int y = 0; y < 2; y++)
+		{
+			drawMap(offsetX + x * Game::kScreenWidth, offsetY + y * Game::kScreenHeight);
+		}
+	}
+#endif
+	drawCursor();
+}
+
+void Map::drawMap(int offsetX, int offsetY)
+{
 	for (int x = 0; x < kBgNumX; x++)
 	{
 		for (int y = 0; y < kBgNumY; y++)
@@ -175,13 +222,12 @@ void Map::draw()
 			int graphX = (chipNo % chipNumX()) * kChipSize;
 			int graphY = (chipNo / chipNumX()) * kChipSize;
 
-			DrawRectGraph(x * kChipSize + m_scrollX, y * kChipSize + m_scrollY,
+			DrawRectGraph(x * kChipSize + offsetX, y * kChipSize + offsetY,
 				graphX, graphY, kChipSize, kChipSize,
 				m_handle, true, false);
 		}
-	}		 
+	}
 
-	drawCursor();
 }
 
 void Map::drawCursor()
